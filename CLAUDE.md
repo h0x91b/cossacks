@@ -73,3 +73,18 @@ The circular dependency (dmcr.exe ↔ IChat.dll ↔ IntExplorer.dll) is why `-t:
 - Multiple agents may work in parallel. Never touch, reset, or discard other agents' changes. If you see unstaged/staged changes in files you didn't modify — leave them alone.
 - Never run `git reset --hard`, `git checkout .`, `git clean`, or any destructive git commands that could wipe others' work.
 - Write concise commit messages describing what you did.
+
+## Changelog Policy
+
+**For every code change, create a changelog entry file.** This avoids merge conflicts when multiple agents work in parallel.
+
+**Path:** `change-logs/YYYY/MM/DD/<type>-<short-slug>.md`
+
+**Type prefixes:** `feature-`, `fix-`, `refactor-`, `docs-`, `chore-`
+
+**Content:** Plain text, 1-3 sentences describing what was done. No frontmatter, no headers.
+
+**Rules:**
+- Include the changelog file in the same commit as the code change.
+- The slug must be unique and descriptive enough to avoid collisions between parallel agents.
+- See `change-logs/README.md` for the full format specification.
