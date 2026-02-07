@@ -6595,6 +6595,7 @@ int processMainMenu()
 	Exit->Hint = GetTextByID( "MMEXIT" );
 	Exit->AssignSound( GETS( "@MOUSESOUND" ), MOUSE_SOUND );
 	MMenu.addTextButton( nullptr, 1024 - GetRLCStrWidth( BuildVersion, &SmallYellowFont1 ), 748, BuildVersion, &SmallYellowFont1, &SmallYellowFont1, &SmallYellowFont1, 0 );
+	MMenu.addTextButton( nullptr, 10, 748, "Custom Arseniy's build " __DATE__ " " __TIME__, &SmallYellowFont1, &SmallYellowFont1, &SmallYellowFont1, 0 );
 
 	int nn = 0;
 

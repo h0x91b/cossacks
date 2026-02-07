@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(ls:*)",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\VC\\\\Tools\\\\MSVC\\\\14.40.33807\\\\bin\\\\HostX86\\\\x86\\\\dumpbin.exe\" /exports \"D:\\\\src\\\\cossacks-revamp-2017\\\\Cossacks142\\\\IChat.dll\")",
+      "Bash(cmd.exe /c '\"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\VC\\\\Tools\\\\MSVC\\\\14.40.33807\\\\bin\\\\HostX86\\\\x86\\\\dumpbin.exe\"\" /exports \"\"D:\\\\src\\\\cossacks-revamp-2017\\\\Cossacks142\\\\dmcr.exe\"\"')",
+      "Bash(cmd.exe /c '\"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\VC\\\\Tools\\\\MSVC\\\\14.40.33807\\\\bin\\\\HostX86\\\\x86\\\\dumpbin.exe\"\" /exports \"\"D:\\\\src\\\\cossacks-revamp-2017\\\\Cossacks142\\\\IChat.dll\"\"')",
+      "Bash(findstr:*)",
+      "Bash(if not exist \"D:\\\\src\\\\cossacks-revamp-2017\\\\tools\" mkdir \"D:\\\\src\\\\cossacks-revamp-2017\\\\tools\")"
+    ]
+  }
+}
