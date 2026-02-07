@@ -80,13 +80,28 @@ bool ReadBMP8TOBPX(char* Name, byte** data) {
 		if (IOresult() || BM.bfType != 'MB')return false;
 		if (BM.biBitCount != 8)return false;
 
-		// Read BMP palette and build remap table to game palette
+		// Check if the BMP has a non-trivial embedded palette for remapping.
+		// Original game BMPs have all-zero palettes (indices match GPal directly).
+		// Editor-resaved BMPs (mspaint, GIMP) have a real palette that needs remapping.
+		bool needsRemap = false;
 		byte remap[256];
-		byte bmpPal[256 * 4];
-		RSeek(f1, 14 + BM.biSize);
-		RBlockRead(f1, bmpPal, 256 * 4);
-		for (int p = 0; p < 256; p++) {
-			remap[p] = GetPaletteColor(bmpPal[p * 4 + 2], bmpPal[p * 4 + 1], bmpPal[p * 4]);
+		DWORD palOffset = 14 + BM.biSize;
+		if (BM.bfOffBits > palOffset) {
+			byte bmpPal[256 * 4];
+			RSeek(f1, palOffset);
+			RBlockRead(f1, bmpPal, 256 * 4);
+			// Check if palette is non-trivial (not all zeros)
+			for (int p = 0; p < 256 * 4; p++) {
+				if (bmpPal[p] != 0) {
+					needsRemap = true;
+					break;
+				}
+			}
+			if (needsRemap) {
+				for (int p = 0; p < 256; p++) {
+					remap[p] = GetPaletteColor(bmpPal[p * 4 + 2], bmpPal[p * 4 + 1], bmpPal[p * 4]);
+				}
+			}
 		}
 
 		*data = new byte[BM.biWidth*BM.biHeight + 4];
@@ -98,8 +113,10 @@ bool ReadBMP8TOBPX(char* Name, byte** data) {
 		for (int i = 0; i < BM.biHeight; i++) {
 			RSeek(f1, BM.bfOffBits + (BM.biHeight - i - 1)*rwid);
 			RBlockRead(f1, &((*data)[i*wid + 4]), wid);
-			for (int j = 0; j < wid; j++) {
-				(*data)[i*wid + 4 + j] = remap[(*data)[i*wid + 4 + j]];
+			if (needsRemap) {
+				for (int j = 0; j < wid; j++) {
+					(*data)[i*wid + 4 + j] = remap[(*data)[i*wid + 4 + j]];
+				}
 			}
 		};
 		RClose(f1);
