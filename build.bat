@@ -53,6 +53,13 @@ if errorlevel 1 goto :fail
 copy /Y "src\Testing\dmcr.exe" "Cossacks142\dmcr.exe"
 copy /Y "src\Testing\IChat.dll" "Cossacks142\IChat.dll"
 copy /Y "src\Testing\IntExplorer.dll" "Cossacks142\IntExplorer.dll"
+
+echo.
+echo === Building tools ===
+call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86 >nul 2>&1
+cl /nologo /O2 /W4 /D_CRT_SECURE_NO_WARNINGS "tools\gsc_extract.c" /Fe:"tools\gsc_extract.exe" /Fo:"tools\gsc_extract.obj"
+if errorlevel 1 goto :fail
+
 echo.
 echo BUILD OK
 pause
