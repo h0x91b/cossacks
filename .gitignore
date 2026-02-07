@@ -3,3 +3,8 @@
 /src/.vs/
 /src/Temp/
 /src/Testing/
+
+# Build artifacts
+*.obj
+*.exe
+!/tools/*.c
