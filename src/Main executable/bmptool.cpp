@@ -70,6 +70,8 @@ bool ReadBMP8(char* Name, BMPformat* BM, byte** data) {
 	}
 	else return false;
 };
+extern byte GetPaletteColor(int r, int g, int b);
+
 bool ReadBMP8TOBPX(char* Name, byte** data) {
 	BMPformat BM;
 	ResFile f1 = RReset(Name);
@@ -77,6 +79,16 @@ bool ReadBMP8TOBPX(char* Name, byte** data) {
 		RBlockRead(f1, &BM, sizeof BMPformat);
 		if (IOresult() || BM.bfType != 'MB')return false;
 		if (BM.biBitCount != 8)return false;
+
+		// Read BMP palette and build remap table to game palette
+		byte remap[256];
+		byte bmpPal[256 * 4];
+		RSeek(f1, 14 + BM.biSize);
+		RBlockRead(f1, bmpPal, 256 * 4);
+		for (int p = 0; p < 256; p++) {
+			remap[p] = GetPaletteColor(bmpPal[p * 4 + 2], bmpPal[p * 4 + 1], bmpPal[p * 4]);
+		}
+
 		*data = new byte[BM.biWidth*BM.biHeight + 4];
 		int wid = BM.biWidth;
 		int rwid = wid;
@@ -84,8 +96,11 @@ bool ReadBMP8TOBPX(char* Name, byte** data) {
 		((short*)*data)[0] = BM.biWidth;
 		((short*)*data)[1] = BM.biHeight;
 		for (int i = 0; i < BM.biHeight; i++) {
-			RSeek(f1,/*(sizeof BMPformat)+1024*/BM.bfOffBits + (BM.biHeight - i - 1)*rwid);
+			RSeek(f1, BM.bfOffBits + (BM.biHeight - i - 1)*rwid);
 			RBlockRead(f1, &((*data)[i*wid + 4]), wid);
+			for (int j = 0; j < wid; j++) {
+				(*data)[i*wid + 4 + j] = remap[(*data)[i*wid + 4 + j]];
+			}
 		};
 		RClose(f1);
 		return true;
