@@ -63,3 +63,13 @@ The circular dependency (dmcr.exe ↔ IChat.dll ↔ IntExplorer.dll) is why `-t:
 - Testing: `/MTd` (debug static CRT), no optimization, debug info
 - Warning level 4 for main executable, level 3 for libraries
 - C4996 (deprecated functions) is disabled across all projects
+
+## Git Commit Policy
+
+**Always commit your changes before responding to the user.** When you've made changes and reached a logical completion point, commit before reporting back. This prevents source code from being lost.
+
+**Rules for committing:**
+- Commit only the files YOU changed. Use `git add <specific files>` — never `git add -A` or `git add .`.
+- Multiple agents may work in parallel. Never touch, reset, or discard other agents' changes. If you see unstaged/staged changes in files you didn't modify — leave them alone.
+- Never run `git reset --hard`, `git checkout .`, `git clean`, or any destructive git commands that could wipe others' work.
+- Write concise commit messages describing what you did.
