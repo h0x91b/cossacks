@@ -1962,17 +1962,43 @@ void GFieldShow()
 	// === Resource stats table (top-right corner) ===
 	{
 		extern void TakeResLink(OneObject*);
+		extern int REALTIME;
 		char statBuf[64];
 		int lineH = 14;
 		int pad = 12;
 		int tableW = 200;
 		int tx = smapx + (smaplx << 5) - tableW - 10;
-		int ty = smapy + 10;
+		int ty = smapy + 40;
 		byte cLine = 255;
 
-		// --- Gather live data ---
+		// --- Measure food & gold drain via ResOnLife delta ---
+		static int lastDrainTime = 0;
+		static int lastFoodConsumed = 0;
+		static int lastGoldConsumed = 0;
+		static int foodDrainPerSec = 0;
+		static int goldDrainPerSec = 0;
+
 		int ni = NatRefTBL[MyNation];
 		Nation* NT = &NATIONS[ni];
+
+		int curFoodConsumed = NT->ResOnLife[FoodID];
+		int curGoldConsumed = NT->ResOnLife[GoldID];
+
+		if (lastDrainTime == 0)
+		{
+			lastDrainTime = REALTIME;
+			lastFoodConsumed = curFoodConsumed;
+			lastGoldConsumed = curGoldConsumed;
+		}
+		else if (REALTIME - lastDrainTime >= 1000)
+		{
+			int dt = REALTIME - lastDrainTime;
+			foodDrainPerSec = (curFoodConsumed - lastFoodConsumed) * 1000 / dt;
+			goldDrainPerSec = (curGoldConsumed - lastGoldConsumed) * 1000 / dt;
+			lastDrainTime = REALTIME;
+			lastFoodConsumed = curFoodConsumed;
+			lastGoldConsumed = curGoldConsumed;
+		}
 
 		// Peasant counts per resource (by checking current order)
 		int nOnWood = 0, nOnFood = 0, nOnStone = 0;
@@ -2028,19 +2054,9 @@ void GFieldShow()
 		int incFood  = CITY[ni].FoodSpeed;
 		int incStone = CITY[ni].StoneSpeed;
 
-		// Gold drain (same formula as ShowDoxod)
-		int goldDrain = NT->ResSpeed[GoldID];
-		int goldDrainWhole = goldDrain / 800;
-		int goldDrainFrac  = (goldDrain / 80) % 10;
-
-		// Food drain (population-based)
-		int foodDrain = NT->NGidot * ResPerUnit;
-		int foodDrainWhole = foodDrain / 800;
-		int foodDrainFrac  = (foodDrain / 80) % 10;
-
 		// --- Calculate table height ---
-		// header + sep + 6 resources + sep + idle + free slots + sep + army
-		int tableH = pad + lineH * 11 + 16 + pad;
+		// header(1) + sep + 6 resources + sep + idle + free slots = 10 lines + 8px seps
+		int tableH = pad + lineH * 10 + 8 + pad;
 		Xbar(tx, ty, tableW, tableH, cLine);
 
 		int x0 = tx + pad;
@@ -2062,10 +2078,10 @@ void GFieldShow()
 		y += lineH;
 
 		// Food: count +income/s -drain/s
-		if (foodDrainFrac)
-			sprintf(statBuf, "Food:  %d  +%d/s -%d.%d/s", nOnFood, incFood, foodDrainWhole, foodDrainFrac);
+		if (foodDrainPerSec > 0)
+			sprintf(statBuf, "Food:  %d  +%d/s -%d/s", nOnFood, incFood, foodDrainPerSec);
 		else
-			sprintf(statBuf, "Food:  %d  +%d/s -%d/s", nOnFood, incFood, foodDrainWhole);
+			sprintf(statBuf, "Food:  %d  +%d/s", nOnFood, incFood);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
@@ -2077,12 +2093,12 @@ void GFieldShow()
 		y += lineH;
 
 		// Gold: miners -drain/s
-		if (goldDrainFrac)
-			sprintf(statBuf, "Gold:  %d  -%d.%d/s", nGold, goldDrainWhole, goldDrainFrac);
+		if (goldDrainPerSec > 0)
+			sprintf(statBuf, "Gold:  %d  -%d/s", nGold, goldDrainPerSec);
 		else
-			sprintf(statBuf, "Gold:  %d  -%d/s", nGold, goldDrainWhole);
+			sprintf(statBuf, "Gold:  %d", nGold);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
-		if (goldDrain > 0)
+		if (goldDrainPerSec > 0)
 			ShowString(x0, y, statBuf, &SmallYellowFont);
 		else
 			ShowString(x0, y, statBuf, &SmallWhiteFont);
