@@ -1959,14 +1959,21 @@ void GFieldShow()
 	//Adjust timestamps for all hints
 	ProcessHints();
 
-	// === Resource stats overlay (top-right corner) ===
+	// === Resource stats table (top-right corner) ===
 	{
 		char statBuf[64];
-		int x0 = smapx + (smaplx << 5) - 200;
-		int y = smapy + 20;
 		int lineH = 14;
+		int pad = 5;
+		int colW = 140;
+		int tableW = colW + pad * 2;
+		int rows = 9; // header + separator + 6 resources + separator + unfilled mines
+		int tableH = pad + lineH * 9 + pad;
+		int tx = smapx + (smaplx << 5) - tableW - 10;
+		int ty = smapy + 10;
+		byte cLine = 255; // white
 
-		// Mock peasant counts per resource
+		// Mock data
+		int mockTotalPeasants = 170;
 		int mockWood = 12;
 		int mockFood = 25;
 		int mockStone = 8;
@@ -1975,12 +1982,29 @@ void GFieldShow()
 		int mockCoal = 3;
 		int mockUnfilledMines = 2;
 
-		sprintf(statBuf, "Wood: %d", mockWood);
+		// Table border
+		Xbar(tx, ty, tableW, tableH, cLine);
+
+		int x0 = tx + pad;
+		int y = ty + pad;
+
+		// Header: Total Peasants
+		sprintf(statBuf, "Peasants: %d", mockTotalPeasants);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Food: %d", mockFood);
+		// Separator line
+		Hline(tx + 1, y, tx + tableW - 2, cLine);
+		y += 4;
+
+		// Resource rows
+		sprintf(statBuf, "Wood:  %d", mockWood);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		sprintf(statBuf, "Food:  %d", mockFood);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
@@ -1990,22 +2014,27 @@ void GFieldShow()
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Gold: %d", mockGold);
+		sprintf(statBuf, "Gold:  %d", mockGold);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Iron: %d", mockIron);
+		sprintf(statBuf, "Iron:  %d", mockIron);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Coal: %d", mockCoal);
+		sprintf(statBuf, "Coal:  %d", mockCoal);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
-		y += lineH + 4;
+		y += lineH;
 
-		sprintf(statBuf, "Unfilled mines: %d", mockUnfilledMines);
+		// Separator line
+		Hline(tx + 1, y, tx + tableW - 2, cLine);
+		y += 4;
+
+		// Unfilled mines (yellow highlight if > 0)
+		sprintf(statBuf, "Free mines: %d", mockUnfilledMines);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		if (mockUnfilledMines > 0)
 			ShowString(x0, y, statBuf, &SmallYellowFont);
