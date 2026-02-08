@@ -1959,6 +1959,36 @@ void GFieldShow()
 	//Adjust timestamps for all hints
 	ProcessHints();
 
+	// === DEBUG: test overlay text in all 4 corners ===
+	{
+		char dbgBuf[64];
+		int m = 30;
+
+		// Top-left
+		ShowString(smapx + m, smapy + m, "TOP-LEFT", &BlackFont);
+		ShowString(smapx + m - 2, smapy + m - 2, "TOP-LEFT", &WhiteFont);
+
+		// Top-right
+		ShowString(smapx + (smaplx << 5) - 150, smapy + m, "TOP-RIGHT", &BlackFont);
+		ShowString(smapx + (smaplx << 5) - 152, smapy + m - 2, "TOP-RIGHT", &WhiteFont);
+
+		// Bottom-left
+		ShowString(smapx + m, smapy + (smaply * 32) - 50, "BOTTOM-LEFT", &BlackFont);
+		ShowString(smapx + m - 2, smapy + (smaply * 32) - 52, "BOTTOM-LEFT", &WhiteFont);
+
+		// Bottom-right
+		ShowString(smapx + (smaplx << 5) - 150, smapy + (smaply * 32) - 50, "BOTTOM-RIGHT", &BlackFont);
+		ShowString(smapx + (smaplx << 5) - 152, smapy + (smaply * 32) - 52, "BOTTOM-RIGHT", &WhiteFont);
+
+		// Center
+		DWORD sec = GetTickCount() / 1000;
+		sprintf(dbgBuf, "Time: %u s", sec);
+		int cx = smapx + (smaplx << 4);
+		int cy = smapy + (smaply * 16);
+		ShowString(cx + 2, cy + 2, dbgBuf, &BlackFont);
+		ShowString(cx, cy, dbgBuf, &WhiteFont);
+	}
+
 	ShowDestn();
 
 	time7 = GetRealTime() - time0;
@@ -2792,22 +2822,6 @@ void ProcessScreen()
 	GlobalHandleMouse(false);//BUGFIX: call rate was way to high
 	MFix();
 
-	// === DEBUG: test overlay text in top-right corner ===
-	{
-		char dbgBuf[64];
-		int lineH = 14;
-		int margin = 8;
-		int x0 = RealLx - 160;
-		int y0 = margin;
-
-		ShowString(x0, y0, "Hello 1", &SmallYellowFont);
-		ShowString(x0, y0 + lineH, "Hello 2", &SmallYellowFont);
-		ShowString(x0, y0 + lineH * 2, "Hello 3", &SmallYellowFont);
-
-		DWORD sec = GetTickCount() / 1000;
-		sprintf(dbgBuf, "Time: %u s", sec);
-		ShowString(x0, y0 + lineH * 3, dbgBuf, &SmallYellowFont);
-	}
 }
 
 void HandleSMSChat( char* Mess );
