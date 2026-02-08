@@ -1967,7 +1967,7 @@ void GFieldShow()
 		int colW = 140;
 		int tableW = colW + pad * 2;
 		int rows = 9; // header + separator + 6 resources + separator + unfilled mines
-		int tableH = pad + lineH * 9 + pad;
+		int tableH = pad + lineH * 10 + 12 + pad;
 		int tx = smapx + (smaplx << 5) - tableW - 10;
 		int ty = smapy + 10;
 		byte cLine = 255; // white
@@ -1980,8 +1980,27 @@ void GFieldShow()
 		int nGold  = NInGold[ni];
 		int nIron  = NInIron[ni];
 		int nCoal  = NInCoal[ni];
+
+		// Count idle peasants and unfilled mines
+		int nIdlePeasants = 0;
+		int nUnfilledMines = 0;
+		word* Units = NatList[ni];
+		int Nu = NtNUnits[ni];
+		for (int i = 0; i < Nu; i++)
+		{
+			OneObject* OB = Group[Units[i]];
+			if (OB && !OB->Sdoxlo)
+			{
+				NewMonster* NM = OB->newMons;
+				if (NM->Usage == PeasantID && !OB->LocalOrder)
+					nIdlePeasants++;
+				if (NM->Usage == MineID && OB->Ready &&
+					OB->NInside < OB->AddInside + OB->Ref.General->MoreCharacter->MaxInside)
+					nUnfilledMines++;
+			}
+		}
+
 		int nTotal = nWood + nFood + nStone + nGold + nIron + nCoal;
-		int mockUnfilledMines = 2; // TODO: hook up real data later
 
 		// Table border
 		Xbar(tx, ty, tableW, tableH, cLine);
@@ -2034,10 +2053,19 @@ void GFieldShow()
 		Hline(tx + 1, y, tx + tableW - 2, cLine);
 		y += 4;
 
-		// Unfilled mines (yellow highlight if > 0)
-		sprintf(statBuf, "Free mines: %d", mockUnfilledMines);
+		// Idle peasants (yellow highlight if > 0)
+		sprintf(statBuf, "Idle:  %d", nIdlePeasants);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
-		if (mockUnfilledMines > 0)
+		if (nIdlePeasants > 0)
+			ShowString(x0, y, statBuf, &SmallYellowFont);
+		else
+			ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		// Unfilled mines (yellow highlight if > 0)
+		sprintf(statBuf, "Free mines: %d", nUnfilledMines);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		if (nUnfilledMines > 0)
 			ShowString(x0, y, statBuf, &SmallYellowFont);
 		else
 			ShowString(x0, y, statBuf, &SmallWhiteFont);
