@@ -3,11 +3,17 @@
     "allow": [
       "Bash(dir:*)",
       "Bash(ls:*)",
-      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\VC\\\\Tools\\\\MSVC\\\\14.40.33807\\\\bin\\\\HostX86\\\\x86\\\\dumpbin.exe\" /exports \"D:\\\\src\\\\cossacks-revamp-2017\\\\Cossacks142\\\\IChat.dll\")",
-      "Bash(cmd.exe /c '\"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\VC\\\\Tools\\\\MSVC\\\\14.40.33807\\\\bin\\\\HostX86\\\\x86\\\\dumpbin.exe\"\" /exports \"\"D:\\\\src\\\\cossacks-revamp-2017\\\\Cossacks142\\\\dmcr.exe\"\"')",
-      "Bash(cmd.exe /c '\"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\VC\\\\Tools\\\\MSVC\\\\14.40.33807\\\\bin\\\\HostX86\\\\x86\\\\dumpbin.exe\"\" /exports \"\"D:\\\\src\\\\cossacks-revamp-2017\\\\Cossacks142\\\\IChat.dll\"\"')",
+      "Bash(find:*)",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\*)",
       "Bash(findstr:*)",
-      "Bash(if not exist \"D:\\\\src\\\\cossacks-revamp-2017\\\\tools\" mkdir \"D:\\\\src\\\\cossacks-revamp-2017\\\\tools\")"
+      "Bash(git -C \"D:\\\\src\\\\cossacks-revamp-2017\" status)",
+      "Bash(git -C \"D:\\\\src\\\\cossacks-revamp-2017\" log --oneline -5)",
+      "Bash(python:*)",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\"*)",
+      "Bash(cmd /c \"\"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\VC\\\\Auxiliary\\\\Build\\\\vcvarsall.bat\"\" *\")",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"D:\\\\src\\\\cossacks-revamp-2017\\\\src\\\\Cossacks.sln\" -p:PlatformToolset=v143 -p:WindowsTargetPlatformVersion=10.0.22621.0 -p:Configuration=Release -p:Platform=x86 -m)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nResource stats table with borders, total peasants header, and separators\n\nTable in top-right corner with Xbar border, Hline separators.\nHeader shows total peasant count, then per-resource rows \\(Wood/Food/\nStone/Gold/Iron/Coal\\), then free mines with yellow highlight when > 0.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

@@ -88,3 +88,7 @@ The circular dependency (dmcr.exe ↔ IChat.dll ↔ IntExplorer.dll) is why `-t:
 - Include the changelog file in the same commit as the code change.
 - The slug must be unique and descriptive enough to avoid collisions between parallel agents.
 - See `change-logs/README.md` for the full format specification.
+
+## Scripting
+
+Use python instead of PowerShell when you need to make any utility call
