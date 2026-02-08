@@ -1961,29 +1961,27 @@ void GFieldShow()
 
 	// === Resource stats table (top-right corner) ===
 	{
+		extern void TakeResLink(OneObject*);
 		char statBuf[64];
 		int lineH = 14;
 		int pad = 12;
-		int colW = 140;
-		int tableW = colW + pad * 2;
-		int rows = 9; // header + separator + 6 resources + separator + unfilled mines
-		int tableH = pad + lineH * 10 + 12 + pad;
+		int tableW = 200;
 		int tx = smapx + (smaplx << 5) - tableW - 10;
 		int ty = smapy + 10;
-		byte cLine = 255; // white
+		byte cLine = 255;
 
-		// Live data from game state
+		// --- Gather live data ---
 		int ni = NatRefTBL[MyNation];
-		int nWood  = CITY[ni].WoodSpeed;
-		int nFood  = CITY[ni].FoodSpeed;
-		int nStone = CITY[ni].StoneSpeed;
-		int nGold  = NInGold[ni];
-		int nIron  = NInIron[ni];
-		int nCoal  = NInCoal[ni];
+		Nation* NT = &NATIONS[ni];
 
-		// Count idle peasants and unfilled mines
+		// Peasant counts per resource (by checking current order)
+		int nOnWood = 0, nOnFood = 0, nOnStone = 0;
 		int nIdlePeasants = 0;
 		int nUnfilledMines = 0;
+		int nFreeSlots = 0;
+		int nArmySize = 0;
+		int nTotalPeasants = 0;
+
 		word* Units = NatList[ni];
 		int Nu = NtNUnits[ni];
 		for (int i = 0; i < Nu; i++)
@@ -1992,68 +1990,120 @@ void GFieldShow()
 			if (OB && !OB->Sdoxlo)
 			{
 				NewMonster* NM = OB->newMons;
-				if (NM->Usage == PeasantID && !OB->LocalOrder)
-					nIdlePeasants++;
-				if (NM->Usage == MineID && OB->Ready &&
-					OB->NInside < OB->AddInside + OB->Ref.General->MoreCharacter->MaxInside)
-					nUnfilledMines++;
+				if (NM->Usage == PeasantID)
+				{
+					nTotalPeasants++;
+					if (!OB->LocalOrder)
+						nIdlePeasants++;
+					else if (OB->LocalOrder->DoLink == (ReportFn*)&TakeResLink)
+					{
+						byte rid = OB->LocalOrder->info.TakeRes.ResID;
+						if (rid == TreeID)       nOnWood++;
+						else if (rid == FoodID)  nOnFood++;
+						else if (rid == StoneID) nOnStone++;
+					}
+				}
+				else if (!NM->Building)
+					nArmySize++;
+
+				if (NM->Usage == MineID && OB->Ready)
+				{
+					int maxCap = OB->AddInside + OB->Ref.General->MoreCharacter->MaxInside;
+					if (OB->NInside < maxCap)
+					{
+						nUnfilledMines++;
+						nFreeSlots += maxCap - OB->NInside;
+					}
+				}
 			}
 		}
 
-		int nTotal = nWood + nFood + nStone + nGold + nIron + nCoal;
+		// Mine peasants (already tracked by game)
+		int nGold = NInGold[ni];
+		int nIron = NInIron[ni];
+		int nCoal = NInCoal[ni];
 
-		// Table border
+		// Income rates
+		int incWood  = CITY[ni].WoodSpeed;
+		int incFood  = CITY[ni].FoodSpeed;
+		int incStone = CITY[ni].StoneSpeed;
+
+		// Gold drain (same formula as ShowDoxod)
+		int goldDrain = NT->ResSpeed[GoldID];
+		int goldDrainWhole = goldDrain / 800;
+		int goldDrainFrac  = (goldDrain / 80) % 10;
+
+		// Food drain (population-based)
+		int foodDrain = NT->NGidot * ResPerUnit;
+		int foodDrainWhole = foodDrain / 800;
+		int foodDrainFrac  = (foodDrain / 80) % 10;
+
+		// --- Calculate table height ---
+		// header + sep + 6 resources + sep + idle + free slots + sep + army
+		int tableH = pad + lineH * 11 + 16 + pad;
 		Xbar(tx, ty, tableW, tableH, cLine);
 
 		int x0 = tx + pad;
 		int y = ty + pad;
 
-		// Header: Total Peasants
-		sprintf(statBuf, "Peasants: %d", nTotal);
+		// Header: Total Peasants + Army
+		sprintf(statBuf, "Peasants: %d  Army: %d", nTotalPeasants, nArmySize);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		// Separator line
 		Hline(tx + 1, y, tx + tableW - 2, cLine);
 		y += 4;
 
-		// Resource rows
-		sprintf(statBuf, "Wood:  %d", nWood);
+		// Wood: count +income/s
+		sprintf(statBuf, "Wood:  %d  +%d/s", nOnWood, incWood);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Food:  %d", nFood);
+		// Food: count +income/s -drain/s
+		if (foodDrainFrac)
+			sprintf(statBuf, "Food:  %d  +%d/s -%d.%d/s", nOnFood, incFood, foodDrainWhole, foodDrainFrac);
+		else
+			sprintf(statBuf, "Food:  %d  +%d/s -%d/s", nOnFood, incFood, foodDrainWhole);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Stone: %d", nStone);
+		// Stone: count +income/s
+		sprintf(statBuf, "Stone: %d  +%d/s", nOnStone, incStone);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Gold:  %d", nGold);
+		// Gold: miners -drain/s
+		if (goldDrainFrac)
+			sprintf(statBuf, "Gold:  %d  -%d.%d/s", nGold, goldDrainWhole, goldDrainFrac);
+		else
+			sprintf(statBuf, "Gold:  %d  -%d/s", nGold, goldDrainWhole);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
-		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		if (goldDrain > 0)
+			ShowString(x0, y, statBuf, &SmallYellowFont);
+		else
+			ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
+		// Iron: miners
 		sprintf(statBuf, "Iron:  %d", nIron);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
+		// Coal: miners
 		sprintf(statBuf, "Coal:  %d", nCoal);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		// Separator line
 		Hline(tx + 1, y, tx + tableW - 2, cLine);
 		y += 4;
 
-		// Idle peasants (yellow highlight if > 0)
+		// Idle peasants
 		sprintf(statBuf, "Idle:  %d", nIdlePeasants);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		if (nIdlePeasants > 0)
@@ -2062,10 +2112,10 @@ void GFieldShow()
 			ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		// Unfilled mines (yellow highlight if > 0)
-		sprintf(statBuf, "Free mines: %d", nUnfilledMines);
+		// Free mine slots
+		sprintf(statBuf, "Free slots: %d (%d mines)", nFreeSlots, nUnfilledMines);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
-		if (nUnfilledMines > 0)
+		if (nFreeSlots > 0)
 			ShowString(x0, y, statBuf, &SmallYellowFont);
 		else
 			ShowString(x0, y, statBuf, &SmallWhiteFont);
