@@ -77,69 +77,6 @@ bool ReadBMP8TOBPX(char* Name, byte** data) {
 		RBlockRead(f1, &BM, sizeof BMPformat);
 		if (IOresult() || BM.bfType != 'MB')return false;
 		if (BM.biBitCount != 8)return false;
-
-		// Remap BMP palette indices to game palette if the BMP was resaved
-		// by an external editor (mspaint, GIMP, etc.).
-		// We read the .pal file directly because GPal[] may be zeroed
-		// (SetDarkPalette clears it before menu BMP loading).
-		// Only remap if the BMP palette clearly differs from the game palette
-		// (total color distance above threshold). This avoids touching game BMPs
-		// whose embedded palette matches or nearly matches the .pal file.
-		bool needsRemap = false;
-		byte remap[256];
-		DWORD palOffset = 14 + BM.biSize;
-		if (BM.bfOffBits > palOffset) {
-			byte bmpPal[256 * 4];
-			RSeek(f1, palOffset);
-			RBlockRead(f1, bmpPal, 256 * 4);
-
-			// Load game palette from .pal file
-			byte gamePal[256 * 3];
-			memset(gamePal, 0, sizeof gamePal);
-			ResFile pf = RReset("agew_1.pal");
-			if (pf != INVALID_HANDLE_VALUE) {
-				RBlockRead(pf, gamePal, 256 * 3);
-				RClose(pf);
-			}
-
-			// Compare: compute total minimum color distance.
-			// Game BMPs: every color exists in .pal → totalDist ~0.
-			// Editor BMPs: most colors are foreign → totalDist >> 0.
-			int totalDist = 0;
-			for (int p = 0; p < 256; p++) {
-				int br = bmpPal[p * 4 + 2];
-				int bg = bmpPal[p * 4 + 1];
-				int bb = bmpPal[p * 4];
-				int bestDist = 10000;
-				for (int i = 0; i < 256; i++) {
-					int d = abs(br - gamePal[i * 3]) + abs(bg - gamePal[i * 3 + 1]) + abs(bb - gamePal[i * 3 + 2]);
-					if (d < bestDist) bestDist = d;
-				}
-				totalDist += bestDist;
-			}
-
-			// Game palette: totalDist == 0. Editor palette: totalDist > 1000.
-			// Threshold 256 allows minor per-entry differences (avg 1 per entry).
-			if (totalDist > 256) {
-				needsRemap = true;
-				for (int p = 0; p < 256; p++) {
-					int br = bmpPal[p * 4 + 2];
-					int bg = bmpPal[p * 4 + 1];
-					int bb = bmpPal[p * 4];
-					int dmax = 10000;
-					int bestc = 0;
-					for (int i = 0; i < 256; i++) {
-						int d = abs(br - gamePal[i * 3]) + abs(bg - gamePal[i * 3 + 1]) + abs(bb - gamePal[i * 3 + 2]);
-						if (d < dmax) {
-							dmax = d;
-							bestc = i;
-						}
-					}
-					remap[p] = bestc;
-				}
-			}
-		}
-
 		*data = new byte[BM.biWidth*BM.biHeight + 4];
 		int wid = BM.biWidth;
 		int rwid = wid;
@@ -147,13 +84,8 @@ bool ReadBMP8TOBPX(char* Name, byte** data) {
 		((short*)*data)[0] = BM.biWidth;
 		((short*)*data)[1] = BM.biHeight;
 		for (int i = 0; i < BM.biHeight; i++) {
-			RSeek(f1, BM.bfOffBits + (BM.biHeight - i - 1)*rwid);
+			RSeek(f1,/*(sizeof BMPformat)+1024*/BM.bfOffBits + (BM.biHeight - i - 1)*rwid);
 			RBlockRead(f1, &((*data)[i*wid + 4]), wid);
-			if (needsRemap) {
-				for (int j = 0; j < wid; j++) {
-					(*data)[i*wid + 4 + j] = remap[(*data)[i*wid + 4 + j]];
-				}
-			}
 		};
 		RClose(f1);
 		return true;
