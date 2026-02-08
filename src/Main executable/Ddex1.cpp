@@ -3403,7 +3403,7 @@ int PASCAL WinMain(
 	Flips = 0;
 	tmtim = 0;
 
-	HealthMode = false;
+	HealthMode = true;
 	InfoMode = true;
 	DeathMode = false;
 	AttackMode = false;
