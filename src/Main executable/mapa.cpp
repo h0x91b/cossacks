@@ -2791,6 +2791,23 @@ void ProcessScreen()
 	DrawZones();
 	GlobalHandleMouse(false);//BUGFIX: call rate was way to high
 	MFix();
+
+	// === DEBUG: test overlay text in top-right corner ===
+	{
+		char dbgBuf[64];
+		int lineH = 14;
+		int margin = 8;
+		int x0 = RealLx - 160;
+		int y0 = margin;
+
+		ShowString(x0, y0, "Hello 1", &SmallYellowFont);
+		ShowString(x0, y0 + lineH, "Hello 2", &SmallYellowFont);
+		ShowString(x0, y0 + lineH * 2, "Hello 3", &SmallYellowFont);
+
+		DWORD sec = GetTickCount() / 1000;
+		sprintf(dbgBuf, "Time: %u s", sec);
+		ShowString(x0, y0 + lineH * 3, dbgBuf, &SmallYellowFont);
+	}
 }
 
 void HandleSMSChat( char* Mess );
