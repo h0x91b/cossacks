@@ -1962,50 +1962,15 @@ void GFieldShow()
 	// === Resource stats table (top-right corner) ===
 	{
 		extern void TakeResLink(OneObject*);
-		extern int REALTIME;
 		char statBuf[64];
 		int lineH = 14;
 		int pad = 12;
-		int tableW = 200;
+		int tableW = 160;
 		int tx = smapx + (smaplx << 5) - tableW - 10;
 		int ty = smapy + 40;
 		byte cLine = 255;
 
 		int ni = NatRefTBL[MyNation];
-		Nation* NT = &NATIONS[ni];
-
-		// --- Measure drain via actual resource value delta ---
-		static int lastDrainTime = 0;
-		static int lastFood = 0;
-		static int lastGold = 0;
-		static int foodDrainPerSec = 0;
-		static int goldDrainPerSec = 0;
-
-		int curFood = XRESRC(ni, FoodID);
-		int curGold = XRESRC(ni, GoldID);
-
-		if (lastDrainTime == 0)
-		{
-			lastDrainTime = REALTIME;
-			lastFood = curFood;
-			lastGold = curGold;
-		}
-		else if (REALTIME - lastDrainTime >= 1000)
-		{
-			int dt = REALTIME - lastDrainTime;
-			// Net resource change per second
-			int foodNet = (curFood - lastFood) * 1000 / dt;
-			int goldNet = (curGold - lastGold) * 1000 / dt;
-			// Drain = income - net (if net < income, something is consuming)
-			foodDrainPerSec = CITY[ni].FoodSpeed - foodNet;
-			if (foodDrainPerSec < 0) foodDrainPerSec = 0;
-			// Gold: just use negative net as drain
-			goldDrainPerSec = -goldNet;
-			if (goldDrainPerSec < 0) goldDrainPerSec = 0;
-			lastDrainTime = REALTIME;
-			lastFood = curFood;
-			lastGold = curGold;
-		}
 
 		// Peasant counts per resource (by checking current order)
 		int nOnWood = 0, nOnFood = 0, nOnStone = 0;
@@ -2060,11 +2025,6 @@ void GFieldShow()
 		int nIron = NInIron[ni];
 		int nCoal = NInCoal[ni];
 
-		// Income rates
-		int incWood  = CITY[ni].WoodSpeed;
-		int incFood  = CITY[ni].FoodSpeed;
-		int incStone = CITY[ni].StoneSpeed;
-
 		// --- Calculate table height ---
 		// header(1) + sep + 6 resources + sep + idle + free slots = 10 lines + 8px seps
 		int tableH = pad + lineH * 10 + 8 + pad;
@@ -2082,37 +2042,25 @@ void GFieldShow()
 		Hline(tx + 1, y, tx + tableW - 2, cLine);
 		y += 4;
 
-		// Wood: count +income/s
-		sprintf(statBuf, "Wood:  %d  +%d/s", nOnWood, incWood);
+		// Resource rows
+		sprintf(statBuf, "Wood:  %d", nOnWood);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		// Food: count +income/s -drain/s
-		if (foodDrainPerSec > 0)
-			sprintf(statBuf, "Food:  %d  +%d/s -%d/s", nOnFood, incFood, foodDrainPerSec);
-		else
-			sprintf(statBuf, "Food:  %d  +%d/s", nOnFood, incFood);
+		sprintf(statBuf, "Food:  %d", nOnFood);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		// Stone: count +income/s
-		sprintf(statBuf, "Stone: %d  +%d/s", nOnStone, incStone);
+		sprintf(statBuf, "Stone: %d", nOnStone);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		// Gold: miners -drain/s
-		if (goldDrainPerSec > 0)
-			sprintf(statBuf, "Gold:  %d  -%d/s", nGold, goldDrainPerSec);
-		else
-			sprintf(statBuf, "Gold:  %d", nGold);
+		sprintf(statBuf, "Gold:  %d", nGold);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
-		if (goldDrainPerSec > 0)
-			ShowString(x0, y, statBuf, &SmallYellowFont);
-		else
-			ShowString(x0, y, statBuf, &SmallWhiteFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
 		// Iron: miners
