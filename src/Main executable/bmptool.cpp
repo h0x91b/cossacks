@@ -70,6 +70,23 @@ bool ReadBMP8(char* Name, BMPformat* BM, byte** data) {
 	}
 	else return false;
 };
+static byte s_gamePal[768];
+static bool s_gamePalLoaded = false;
+
+static void EnsureGamePalLoaded() {
+	if (s_gamePalLoaded) return;
+	memset(s_gamePal, 0, sizeof s_gamePal);
+	HANDLE h = CreateFile("agew_1.pal", GENERIC_READ,
+		FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	if (h != INVALID_HANDLE_VALUE) {
+		DWORD bytesRead;
+		ReadFile(h, s_gamePal, 768, &bytesRead, NULL);
+		CloseHandle(h);
+		if (bytesRead == 768)
+			s_gamePalLoaded = true;
+	}
+}
+
 bool ReadBMP8TOBPX(char* Name, byte** data) {
 	BMPformat BM;
 	ResFile f1 = RReset(Name);
@@ -88,6 +105,69 @@ bool ReadBMP8TOBPX(char* Name, byte** data) {
 			RBlockRead(f1, &((*data)[i*wid + 4]), wid);
 		};
 		RClose(f1);
+
+		// Auto-remap BMP palette if it differs from the game palette
+		EnsureGamePalLoaded();
+		DWORD palOffset = 14 + BM.biSize;
+		if (s_gamePalLoaded && BM.bfOffBits > palOffset) {
+			// Read the BMP's embedded palette (BGRA, 256 entries)
+			byte bmpPal[1024];
+			ResFile f2 = RReset(Name);
+			if (f2 != INVALID_HANDLE_VALUE) {
+				RSeek(f2, palOffset);
+				RBlockRead(f2, bmpPal, 1024);
+				RClose(f2);
+
+				// Compare BMP palette to game palette using Manhattan distance
+				int totalDist = 0;
+				for (int c = 0; c < 256; c++) {
+					int bR = bmpPal[c * 4 + 2];
+					int bG = bmpPal[c * 4 + 1];
+					int bB = bmpPal[c * 4 + 0];
+					int gR = s_gamePal[c * 3 + 0];
+					int gG = s_gamePal[c * 3 + 1];
+					int gB = s_gamePal[c * 3 + 2];
+					int dr = bR - gR; if (dr < 0) dr = -dr;
+					int dg = bG - gG; if (dg < 0) dg = -dg;
+					int db = bB - gB; if (db < 0) db = -db;
+					totalDist += dr + dg + db;
+				}
+
+				if (totalDist > 1000) {
+					// Build remap table: for each BMP palette entry, find nearest game palette entry
+					byte remap[256];
+					for (int c = 0; c < 256; c++) {
+						int bR = bmpPal[c * 4 + 2];
+						int bG = bmpPal[c * 4 + 1];
+						int bB = bmpPal[c * 4 + 0];
+						int bestIdx = 0;
+						int bestDist = 0x7FFFFFFF;
+						for (int g = 0; g < 256; g++) {
+							int gR = s_gamePal[g * 3 + 0];
+							int gG = s_gamePal[g * 3 + 1];
+							int gB = s_gamePal[g * 3 + 2];
+							int dr = bR - gR; if (dr < 0) dr = -dr;
+							int dg = bG - gG; if (dg < 0) dg = -dg;
+							int db = bB - gB; if (db < 0) db = -db;
+							int dist = dr + dg + db;
+							if (dist < bestDist) {
+								bestDist = dist;
+								bestIdx = g;
+							}
+						}
+						remap[c] = (byte)bestIdx;
+					}
+
+					// Apply remap to all pixels
+					int totalPixels = BM.biWidth * BM.biHeight;
+					byte* pixels = (*data) + 4;
+					for (int p = 0; p < totalPixels; p++) {
+						pixels[p] = remap[pixels[p]];
+					}
+				}
+			}
+		}
+
 		return true;
 	}
 	else return false;
