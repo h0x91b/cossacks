@@ -1959,70 +1959,58 @@ void GFieldShow()
 	//Adjust timestamps for all hints
 	ProcessHints();
 
-	// === DEBUG: font showcase in top-right corner ===
+	// === Resource stats overlay (top-right corner) ===
 	{
-		int x0 = smapx + (smaplx << 5) - 280;
+		char statBuf[64];
+		int x0 = smapx + (smaplx << 5) - 200;
 		int y = smapy + 20;
-		int lineH = 20;
+		int lineH = 14;
 
-		ShowString(x0 + 2, y + 2, "WhiteFont", &BlackFont);
-		ShowString(x0, y, "WhiteFont", &WhiteFont);
+		// Mock peasant counts per resource
+		int mockWood = 12;
+		int mockFood = 25;
+		int mockStone = 8;
+		int mockGold = 6;
+		int mockIron = 4;
+		int mockCoal = 3;
+		int mockUnfilledMines = 2;
+
+		sprintf(statBuf, "Wood: %d", mockWood);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		ShowString(x0 + 2, y + 2, "YellowFont", &BlackFont);
-		ShowString(x0, y, "YellowFont", &YellowFont);
+		sprintf(statBuf, "Food: %d", mockFood);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		ShowString(x0 + 2, y + 2, "RedFont", &BlackFont);
-		ShowString(x0, y, "RedFont", &RedFont);
+		sprintf(statBuf, "Stone: %d", mockStone);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		ShowString(x0, y, "BlackFont", &BlackFont);
+		sprintf(statBuf, "Gold: %d", mockGold);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		ShowString(x0 + 2, y + 2, "SmallWhiteFont", &SmallBlackFont);
-		ShowString(x0, y, "SmallWhiteFont", &SmallWhiteFont);
+		sprintf(statBuf, "Iron: %d", mockIron);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		ShowString(x0 + 2, y + 2, "SmallYellowFont", &SmallBlackFont);
-		ShowString(x0, y, "SmallYellowFont", &SmallYellowFont);
-		y += lineH;
+		sprintf(statBuf, "Coal: %d", mockCoal);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH + 4;
 
-		ShowString(x0 + 2, y + 2, "SmallRedFont", &SmallBlackFont);
-		ShowString(x0, y, "SmallRedFont", &SmallRedFont);
-		y += lineH;
-
-		ShowString(x0, y, "SmallBlackFont", &SmallBlackFont);
-		y += lineH;
-
-		ShowString(x0 + 2, y + 2, "BigWhiteFont", &BlackFont);
-		ShowString(x0, y, "BigWhiteFont", &BigWhiteFont);
-		y += lineH + 6;
-
-		ShowString(x0 + 2, y + 2, "BigYellowFont", &BlackFont);
-		ShowString(x0, y, "BigYellowFont", &BigYellowFont);
-		y += lineH + 6;
-
-		ShowString(x0 + 2, y + 2, "BigRedFont", &BlackFont);
-		ShowString(x0, y, "BigRedFont", &BigRedFont);
-		y += lineH + 6;
-
-		ShowString(x0, y, "BigBlackFont", &BigBlackFont);
-		y += lineH + 6;
-
-		ShowString(x0 + 2, y + 2, "SpecialWhiteFont", &BlackFont);
-		ShowString(x0, y, "SpecialWhiteFont", &SpecialWhiteFont);
-		y += lineH;
-
-		ShowString(x0 + 2, y + 2, "SpecialYellowFont", &BlackFont);
-		ShowString(x0, y, "SpecialYellowFont", &SpecialYellowFont);
-		y += lineH;
-
-		ShowString(x0 + 2, y + 2, "SpecialRedFont", &BlackFont);
-		ShowString(x0, y, "SpecialRedFont", &SpecialRedFont);
-		y += lineH;
-
-		ShowString(x0, y, "SpecialBlackFont", &SpecialBlackFont);
+		sprintf(statBuf, "Unfilled mines: %d", mockUnfilledMines);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		if (mockUnfilledMines > 0)
+			ShowString(x0, y, statBuf, &SmallYellowFont);
+		else
+			ShowString(x0, y, statBuf, &SmallWhiteFont);
 	}
 
 	ShowDestn();
