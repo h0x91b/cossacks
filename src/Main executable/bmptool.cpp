@@ -70,8 +70,6 @@ bool ReadBMP8(char* Name, BMPformat* BM, byte** data) {
 	}
 	else return false;
 };
-extern byte GetPaletteColor(int r, int g, int b);
-
 bool ReadBMP8TOBPX(char* Name, byte** data) {
 	BMPformat BM;
 	ResFile f1 = RReset(Name);
@@ -80,9 +78,13 @@ bool ReadBMP8TOBPX(char* Name, byte** data) {
 		if (IOresult() || BM.bfType != 'MB')return false;
 		if (BM.biBitCount != 8)return false;
 
-		// Check if the BMP has a non-trivial embedded palette for remapping.
-		// Original game BMPs have all-zero palettes (indices match GPal directly).
-		// Editor-resaved BMPs (mspaint, GIMP) have a real palette that needs remapping.
+		// Remap BMP palette indices to game palette if the BMP was resaved
+		// by an external editor (mspaint, GIMP, etc.).
+		// We read the .pal file directly because GPal[] may be zeroed
+		// (SetDarkPalette clears it before menu BMP loading).
+		// Only remap if the BMP palette clearly differs from the game palette
+		// (total color distance above threshold). This avoids touching game BMPs
+		// whose embedded palette matches or nearly matches the .pal file.
 		bool needsRemap = false;
 		byte remap[256];
 		DWORD palOffset = 14 + BM.biSize;
@@ -90,16 +92,50 @@ bool ReadBMP8TOBPX(char* Name, byte** data) {
 			byte bmpPal[256 * 4];
 			RSeek(f1, palOffset);
 			RBlockRead(f1, bmpPal, 256 * 4);
-			// Check if palette is non-trivial (not all zeros)
-			for (int p = 0; p < 256 * 4; p++) {
-				if (bmpPal[p] != 0) {
-					needsRemap = true;
-					break;
-				}
+
+			// Load game palette from .pal file
+			byte gamePal[256 * 3];
+			memset(gamePal, 0, sizeof gamePal);
+			ResFile pf = RReset("agew_1.pal");
+			if (pf != INVALID_HANDLE_VALUE) {
+				RBlockRead(pf, gamePal, 256 * 3);
+				RClose(pf);
 			}
-			if (needsRemap) {
+
+			// Compare: compute total minimum color distance.
+			// Game BMPs: every color exists in .pal → totalDist ~0.
+			// Editor BMPs: most colors are foreign → totalDist >> 0.
+			int totalDist = 0;
+			for (int p = 0; p < 256; p++) {
+				int br = bmpPal[p * 4 + 2];
+				int bg = bmpPal[p * 4 + 1];
+				int bb = bmpPal[p * 4];
+				int bestDist = 10000;
+				for (int i = 0; i < 256; i++) {
+					int d = abs(br - gamePal[i * 3]) + abs(bg - gamePal[i * 3 + 1]) + abs(bb - gamePal[i * 3 + 2]);
+					if (d < bestDist) bestDist = d;
+				}
+				totalDist += bestDist;
+			}
+
+			// Game palette: totalDist == 0. Editor palette: totalDist > 1000.
+			// Threshold 256 allows minor per-entry differences (avg 1 per entry).
+			if (totalDist > 256) {
+				needsRemap = true;
 				for (int p = 0; p < 256; p++) {
-					remap[p] = GetPaletteColor(bmpPal[p * 4 + 2], bmpPal[p * 4 + 1], bmpPal[p * 4]);
+					int br = bmpPal[p * 4 + 2];
+					int bg = bmpPal[p * 4 + 1];
+					int bb = bmpPal[p * 4];
+					int dmax = 10000;
+					int bestc = 0;
+					for (int i = 0; i < 256; i++) {
+						int d = abs(br - gamePal[i * 3]) + abs(bg - gamePal[i * 3 + 1]) + abs(bb - gamePal[i * 3 + 2]);
+						if (d < dmax) {
+							dmax = d;
+							bestc = i;
+						}
+					}
+					remap[p] = bestc;
 				}
 			}
 		}
