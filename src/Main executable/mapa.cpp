@@ -1959,34 +1959,70 @@ void GFieldShow()
 	//Adjust timestamps for all hints
 	ProcessHints();
 
-	// === DEBUG: test overlay text in all 4 corners ===
+	// === DEBUG: font showcase in top-right corner ===
 	{
-		char dbgBuf[64];
-		int m = 30;
+		int x0 = smapx + (smaplx << 5) - 280;
+		int y = smapy + 20;
+		int lineH = 20;
 
-		// Top-left
-		ShowString(smapx + m, smapy + m, "TOP-LEFT", &BlackFont);
-		ShowString(smapx + m - 2, smapy + m - 2, "TOP-LEFT", &WhiteFont);
+		ShowString(x0 + 2, y + 2, "WhiteFont", &BlackFont);
+		ShowString(x0, y, "WhiteFont", &WhiteFont);
+		y += lineH;
 
-		// Top-right
-		ShowString(smapx + (smaplx << 5) - 150, smapy + m, "TOP-RIGHT", &BlackFont);
-		ShowString(smapx + (smaplx << 5) - 152, smapy + m - 2, "TOP-RIGHT", &WhiteFont);
+		ShowString(x0 + 2, y + 2, "YellowFont", &BlackFont);
+		ShowString(x0, y, "YellowFont", &YellowFont);
+		y += lineH;
 
-		// Bottom-left
-		ShowString(smapx + m, smapy + (smaply * 32) - 50, "BOTTOM-LEFT", &BlackFont);
-		ShowString(smapx + m - 2, smapy + (smaply * 32) - 52, "BOTTOM-LEFT", &WhiteFont);
+		ShowString(x0 + 2, y + 2, "RedFont", &BlackFont);
+		ShowString(x0, y, "RedFont", &RedFont);
+		y += lineH;
 
-		// Bottom-right
-		ShowString(smapx + (smaplx << 5) - 150, smapy + (smaply * 32) - 50, "BOTTOM-RIGHT", &BlackFont);
-		ShowString(smapx + (smaplx << 5) - 152, smapy + (smaply * 32) - 52, "BOTTOM-RIGHT", &WhiteFont);
+		ShowString(x0, y, "BlackFont", &BlackFont);
+		y += lineH;
 
-		// Center
-		DWORD sec = GetTickCount() / 1000;
-		sprintf(dbgBuf, "Time: %u s", sec);
-		int cx = smapx + (smaplx << 4);
-		int cy = smapy + (smaply * 16);
-		ShowString(cx + 2, cy + 2, dbgBuf, &BlackFont);
-		ShowString(cx, cy, dbgBuf, &WhiteFont);
+		ShowString(x0 + 2, y + 2, "SmallWhiteFont", &SmallBlackFont);
+		ShowString(x0, y, "SmallWhiteFont", &SmallWhiteFont);
+		y += lineH;
+
+		ShowString(x0 + 2, y + 2, "SmallYellowFont", &SmallBlackFont);
+		ShowString(x0, y, "SmallYellowFont", &SmallYellowFont);
+		y += lineH;
+
+		ShowString(x0 + 2, y + 2, "SmallRedFont", &SmallBlackFont);
+		ShowString(x0, y, "SmallRedFont", &SmallRedFont);
+		y += lineH;
+
+		ShowString(x0, y, "SmallBlackFont", &SmallBlackFont);
+		y += lineH;
+
+		ShowString(x0 + 2, y + 2, "BigWhiteFont", &BlackFont);
+		ShowString(x0, y, "BigWhiteFont", &BigWhiteFont);
+		y += lineH + 6;
+
+		ShowString(x0 + 2, y + 2, "BigYellowFont", &BlackFont);
+		ShowString(x0, y, "BigYellowFont", &BigYellowFont);
+		y += lineH + 6;
+
+		ShowString(x0 + 2, y + 2, "BigRedFont", &BlackFont);
+		ShowString(x0, y, "BigRedFont", &BigRedFont);
+		y += lineH + 6;
+
+		ShowString(x0, y, "BigBlackFont", &BigBlackFont);
+		y += lineH + 6;
+
+		ShowString(x0 + 2, y + 2, "SpecialWhiteFont", &BlackFont);
+		ShowString(x0, y, "SpecialWhiteFont", &SpecialWhiteFont);
+		y += lineH;
+
+		ShowString(x0 + 2, y + 2, "SpecialYellowFont", &BlackFont);
+		ShowString(x0, y, "SpecialYellowFont", &SpecialYellowFont);
+		y += lineH;
+
+		ShowString(x0 + 2, y + 2, "SpecialRedFont", &BlackFont);
+		ShowString(x0, y, "SpecialRedFont", &SpecialRedFont);
+		y += lineH;
+
+		ShowString(x0, y, "SpecialBlackFont", &SpecialBlackFont);
 	}
 
 	ShowDestn();
