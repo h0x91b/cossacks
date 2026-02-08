@@ -1972,15 +1972,16 @@ void GFieldShow()
 		int ty = smapy + 10;
 		byte cLine = 255; // white
 
-		// Mock data
-		int mockTotalPeasants = 170;
-		int mockWood = 12;
-		int mockFood = 25;
-		int mockStone = 8;
-		int mockGold = 6;
-		int mockIron = 4;
-		int mockCoal = 3;
-		int mockUnfilledMines = 2;
+		// Live data from game state
+		int ni = NatRefTBL[MyNation];
+		int nWood  = CITY[ni].WoodSpeed;
+		int nFood  = CITY[ni].FoodSpeed;
+		int nStone = CITY[ni].StoneSpeed;
+		int nGold  = NInGold[ni];
+		int nIron  = NInIron[ni];
+		int nCoal  = NInCoal[ni];
+		int nTotal = nWood + nFood + nStone + nGold + nIron + nCoal;
+		int mockUnfilledMines = 2; // TODO: hook up real data later
 
 		// Table border
 		Xbar(tx, ty, tableW, tableH, cLine);
@@ -1989,7 +1990,7 @@ void GFieldShow()
 		int y = ty + pad;
 
 		// Header: Total Peasants
-		sprintf(statBuf, "Peasants: %d", mockTotalPeasants);
+		sprintf(statBuf, "Peasants: %d", nTotal);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
@@ -1999,32 +2000,32 @@ void GFieldShow()
 		y += 4;
 
 		// Resource rows
-		sprintf(statBuf, "Wood:  %d", mockWood);
+		sprintf(statBuf, "Wood:  %d", nWood);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Food:  %d", mockFood);
+		sprintf(statBuf, "Food:  %d", nFood);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Stone: %d", mockStone);
+		sprintf(statBuf, "Stone: %d", nStone);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Gold:  %d", mockGold);
+		sprintf(statBuf, "Gold:  %d", nGold);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Iron:  %d", mockIron);
+		sprintf(statBuf, "Iron:  %d", nIron);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
 
-		sprintf(statBuf, "Coal:  %d", mockCoal);
+		sprintf(statBuf, "Coal:  %d", nCoal);
 		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
 		ShowString(x0, y, statBuf, &SmallWhiteFont);
 		y += lineH;
