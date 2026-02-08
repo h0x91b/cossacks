@@ -1963,7 +1963,7 @@ void GFieldShow()
 	{
 		char statBuf[64];
 		int lineH = 14;
-		int pad = 5;
+		int pad = 12;
 		int colW = 140;
 		int tableW = colW + pad * 2;
 		int rows = 9; // header + separator + 6 resources + separator + unfilled mines
