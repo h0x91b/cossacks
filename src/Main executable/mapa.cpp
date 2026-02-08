@@ -1971,33 +1971,40 @@ void GFieldShow()
 		int ty = smapy + 40;
 		byte cLine = 255;
 
-		// --- Measure food & gold drain via ResOnLife delta ---
-		static int lastDrainTime = 0;
-		static int lastFoodConsumed = 0;
-		static int lastGoldConsumed = 0;
-		static int foodDrainPerSec = 0;
-		static int goldDrainPerSec = 0;
-
 		int ni = NatRefTBL[MyNation];
 		Nation* NT = &NATIONS[ni];
 
-		int curFoodConsumed = NT->ResOnLife[FoodID];
-		int curGoldConsumed = NT->ResOnLife[GoldID];
+		// --- Measure drain via actual resource value delta ---
+		static int lastDrainTime = 0;
+		static int lastFood = 0;
+		static int lastGold = 0;
+		static int foodDrainPerSec = 0;
+		static int goldDrainPerSec = 0;
+
+		int curFood = XRESRC(ni, FoodID);
+		int curGold = XRESRC(ni, GoldID);
 
 		if (lastDrainTime == 0)
 		{
 			lastDrainTime = REALTIME;
-			lastFoodConsumed = curFoodConsumed;
-			lastGoldConsumed = curGoldConsumed;
+			lastFood = curFood;
+			lastGold = curGold;
 		}
 		else if (REALTIME - lastDrainTime >= 1000)
 		{
 			int dt = REALTIME - lastDrainTime;
-			foodDrainPerSec = (curFoodConsumed - lastFoodConsumed) * 1000 / dt;
-			goldDrainPerSec = (curGoldConsumed - lastGoldConsumed) * 1000 / dt;
+			// Net resource change per second
+			int foodNet = (curFood - lastFood) * 1000 / dt;
+			int goldNet = (curGold - lastGold) * 1000 / dt;
+			// Drain = income - net (if net < income, something is consuming)
+			foodDrainPerSec = CITY[ni].FoodSpeed - foodNet;
+			if (foodDrainPerSec < 0) foodDrainPerSec = 0;
+			// Gold: just use negative net as drain
+			goldDrainPerSec = -goldNet;
+			if (goldDrainPerSec < 0) goldDrainPerSec = 0;
 			lastDrainTime = REALTIME;
-			lastFoodConsumed = curFoodConsumed;
-			lastGoldConsumed = curGoldConsumed;
+			lastFood = curFood;
+			lastGold = curGold;
 		}
 
 		// Peasant counts per resource (by checking current order)
@@ -2010,36 +2017,40 @@ void GFieldShow()
 
 		word* Units = NatList[ni];
 		int Nu = NtNUnits[ni];
-		for (int i = 0; i < Nu; i++)
+		if (Units) for (int i = 0; i < Nu; i++)
 		{
 			OneObject* OB = Group[Units[i]];
-			if (OB && !OB->Sdoxlo)
-			{
-				NewMonster* NM = OB->newMons;
-				if (NM->Usage == PeasantID)
-				{
-					nTotalPeasants++;
-					if (!OB->LocalOrder)
-						nIdlePeasants++;
-					else if (OB->LocalOrder->DoLink == (ReportFn*)&TakeResLink)
-					{
-						byte rid = OB->LocalOrder->info.TakeRes.ResID;
-						if (rid == TreeID)       nOnWood++;
-						else if (rid == FoodID)  nOnFood++;
-						else if (rid == StoneID) nOnStone++;
-					}
-				}
-				else if (!NM->Building)
-					nArmySize++;
+			if (!OB || OB->Sdoxlo)
+				continue;
+			NewMonster* NM = OB->newMons;
+			if (!NM)
+				continue;
 
-				if (NM->Usage == MineID && OB->Ready)
+			if (NM->Usage == PeasantID)
+			{
+				nTotalPeasants++;
+				Order1* ord = OB->LocalOrder;
+				if (!ord)
+					nIdlePeasants++;
+				else if (ord->DoLink == (ReportFn*)&TakeResLink)
 				{
-					int maxCap = OB->AddInside + OB->Ref.General->MoreCharacter->MaxInside;
-					if (OB->NInside < maxCap)
-					{
-						nUnfilledMines++;
-						nFreeSlots += maxCap - OB->NInside;
-					}
+					byte rid = ord->info.TakeRes.ResID;
+					if (rid == TreeID)       nOnWood++;
+					else if (rid == FoodID)  nOnFood++;
+					else if (rid == StoneID) nOnStone++;
+				}
+			}
+			else if (!NM->Building)
+				nArmySize++;
+
+			if (NM->Usage == MineID && OB->Ready && OB->Ref.General
+				&& OB->Ref.General->MoreCharacter)
+			{
+				int maxCap = OB->AddInside + OB->Ref.General->MoreCharacter->MaxInside;
+				if (OB->NInside < maxCap)
+				{
+					nUnfilledMines++;
+					nFreeSlots += maxCap - OB->NInside;
 				}
 			}
 		}
