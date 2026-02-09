@@ -7968,6 +7968,17 @@ void AutoDefendBuildings()
 		if ( TestCapture( mine ) != 0 ) continue;
 
 		int maxGuards = ( mine->newMons->Usage == FarmID ) ? 1 : 2;
+
+		int existingGuards = 0;
+		for ( int g = 0; g < N; g++ )
+		{
+			OneObject* gu = Group[units[g]];
+			if ( gu && !gu->Sdoxlo && gu->Guard == mine->Index )
+				existingGuards++;
+		}
+		if ( existingGuards >= maxGuards ) continue;
+		maxGuards -= existingGuards;
+
 		OneObject* best[2] = { nullptr, nullptr };
 		int bestDist[2] = { 0x7FFFFFFF, 0x7FFFFFFF };
 
