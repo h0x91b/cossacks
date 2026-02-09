@@ -7951,8 +7951,8 @@ int TestCapture( OneObject* OBJ );
 void AutoDefendBuildings()
 {
 	int totalTime = tmtmt + CURTMTMT;
-	if ( totalTime < 500 ) return;
-	if ( totalTime % 500 != 0 ) return;
+	if ( totalTime < 1000 ) return;
+	if ( totalTime % 1000 != 0 ) return;
 
 	byte ni = NatRefTBL[MyNation];
 	int N = NtNUnits[ni];
@@ -7964,10 +7964,10 @@ void AutoDefendBuildings()
 		if ( !mine || mine->Sdoxlo ) continue;
 		if ( !mine->newMons->Building ) continue;
 		if ( !mine->newMons->Capture ) continue;
-		if ( mine->newMons->Usage == FarmID ) continue;
 		if ( !mine->Ready ) continue;
 		if ( TestCapture( mine ) != 0 ) continue;
 
+		int maxGuards = ( mine->newMons->Usage == FarmID ) ? 1 : 2;
 		OneObject* best[2] = { nullptr, nullptr };
 		int bestDist[2] = { 0x7FFFFFFF, 0x7FFFFFFF };
 
@@ -8009,7 +8009,7 @@ void AutoDefendBuildings()
 		}
 
 		int sent = 0;
-		for ( int k = 0; k < 2; k++ )
+		for ( int k = 0; k < maxGuards; k++ )
 		{
 			if ( best[k] )
 			{
