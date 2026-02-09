@@ -4,7 +4,7 @@
 
 <br/>
 
-This repo contains the results of a severe refactoring and bugfixing of the original source code from Cossacks: Back to War 1.35 released back in 2002. The solution is meant to be build in Visual Studio 2015 on a Windows 10 system.
+This repo contains the results of a severe refactoring and bugfixing of the original source code from Cossacks: Back to War 1.35 released back in 2002. The solution is meant to be built in Visual Studio 2022 on a Windows 10/11 system.
 
 ### Changelist
 List of the most important bugs and crash causes that were fixed:
@@ -54,6 +54,23 @@ Other improvements:
 
 <br/>
 
+### Fork changes (2026)
+
+Economy automation:
+  * **Auto-fill mines** — idle peasants within range are automatically sent to nearby unfilled mines every ~40 seconds
+  * **Auto-defend buildings** — free combat units are dispatched to guard undefended capturable buildings (mines, town halls, barracks, etc.); infantry is preferred over cavalry/artillery
+
+HUD / UI:
+  * **Resource stats overlay** — real-time table in the top-right corner showing peasant counts per resource, idle peasants, army size, and free mine slots
+  * **Health bars on by default** — unit health/reload bars (tilde key toggle) are now enabled when a game starts
+  * **Build label in main menu** — compile-time date/time stamp shown in the bottom-left corner
+
+Build system:
+  * Updated to Visual Studio 2022 (Platform Toolset v143)
+  * Fixed clean build bootstrap for circular .lib dependencies
+
+<br/>
+
 ### Checksums
 You could stumble upon an archive somewhere on the net… If you do, those could be helpful:
 
@@ -84,7 +101,7 @@ See [#19](https://github.com/ereb-thanatos/cossacks-revamp-2017/issues/19) for d
 
 <br/>
 
-Здесь представлены результаты усердного рефакторинга и исправления исходного кода игры «Казаки: Снова Война» 1.35, вышедшей в 2002 году. Решение следует собирать в Visual Studio 2015 на системе Windows 10.
+Здесь представлены результаты усердного рефакторинга и исправления исходного кода игры «Казаки: Снова Война» 1.35, вышедшей в 2002 году. Решение следует собирать в Visual Studio 2022 на системе Windows 10/11.
 
 <br/>
 
@@ -133,6 +150,23 @@ See [#19](https://github.com/ereb-thanatos/cossacks-revamp-2017/issues/19) for d
   * Убрано сообщение «[юнит|здание] мешает выстрелу»
   * Увеличено количество и время показа сообщений от других игроков
   * Запись игры всегда включена
+
+<br/>
+
+### Изменения форка (2026)
+
+Автоматизация экономики:
+  * **Авто-заполнение шахт** — свободные крестьяне поблизости автоматически отправляются в незаполненные шахты каждые ~40 секунд
+  * **Авто-защита зданий** — свободные боевые юниты направляются охранять незащищённые захватываемые здания (шахты, ратуши, казармы и т.д.); пехота приоритетнее кавалерии/артиллерии
+
+Интерфейс:
+  * **Оверлей статистики ресурсов** — таблица в правом верхнем углу с количеством крестьян по ресурсам, свободными крестьянами, размером армии и незаполненными шахтами
+  * **Полоски здоровья по умолчанию** — полоски здоровья/перезарядки юнитов (переключение клавишей «~») теперь включены при старте игры
+  * **Метка сборки в главном меню** — дата/время компиляции в левом нижнем углу
+
+Система сборки:
+  * Обновление до Visual Studio 2022 (Platform Toolset v143)
+  * Исправлена последовательная сборка с нуля при циклических зависимостях .lib
 
 <br/>
 
