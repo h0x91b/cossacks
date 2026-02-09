@@ -7948,11 +7948,11 @@ void LongProcesses()
 extern int CURTMTMT;
 int TestCapture( OneObject* OBJ );
 
-void AutoDefendMines()
+void AutoDefendBuildings()
 {
 	int totalTime = tmtmt + CURTMTMT;
-	if ( totalTime < 1500 ) return;
-	if ( totalTime % 1500 != 0 ) return;
+	if ( totalTime < 500 ) return;
+	if ( totalTime % 500 != 0 ) return;
 
 	byte ni = NatRefTBL[MyNation];
 	int N = NtNUnits[ni];
@@ -7962,7 +7962,9 @@ void AutoDefendMines()
 	{
 		OneObject* mine = Group[units[i]];
 		if ( !mine || mine->Sdoxlo ) continue;
-		if ( mine->newMons->Usage != MineID ) continue;
+		if ( !mine->newMons->Building ) continue;
+		if ( !mine->newMons->Capture ) continue;
+		if ( mine->newMons->Usage == FarmID ) continue;
 		if ( !mine->Ready ) continue;
 		if ( TestCapture( mine ) != 0 ) continue;
 
@@ -8021,8 +8023,8 @@ void AutoDefendMines()
 		if ( sent > 0 )
 		{
 			char buf[128];
-			sprintf( buf, "%d unit(s) sent to defend mine", sent );
-			CreateTimedHint( buf, 3000 );
+			sprintf( buf, "%d unit(s) sent to defend building", sent );
+			CreateTimedHint( buf, 6000 );
 		}
 	}
 }
@@ -8036,7 +8038,7 @@ void CalculateMotion()
 	byte MyNT = NatRefTBL[MyNation];
 
 	LongProcesses();
-	AutoDefendMines();
+	AutoDefendBuildings();
 
 	byte Mask = NATIONS[NatRefTBL[MyNation]].NMask;
 	bool sce = !( ( SCENINF.hLib == nullptr )/*||SCENINF.StandartVictory*/ );

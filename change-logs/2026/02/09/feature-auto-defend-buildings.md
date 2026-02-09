@@ -1,0 +1,1 @@
+Expanded auto-defend from mines only to all capturable buildings (except farms/houses). Check interval reduced from 1500 to 500 ticks (3x more frequent). Notification duration doubled from 3000 to 6000. Function renamed from AutoDefendMines to AutoDefendBuildings.
