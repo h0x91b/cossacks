@@ -8040,6 +8040,56 @@ void AutoDefendBuildings()
 	}
 }
 
+void AutoFillMines()
+{
+	int totalTime = tmtmt + CURTMTMT;
+	if ( totalTime < 1000 ) return;
+	if ( totalTime % 1000 != 0 ) return;
+
+	byte ni = NatRefTBL[MyNation];
+	int N = NtNUnits[ni];
+	word* units = NatList[ni];
+	int totalSent = 0;
+
+	for ( int i = 0; i < N; i++ )
+	{
+		OneObject* mine = Group[units[i]];
+		if ( !mine || mine->Sdoxlo ) continue;
+		if ( mine->newMons->Usage != MineID ) continue;
+		if ( !mine->Ready ) continue;
+
+		AdvCharacter* ADC = mine->Ref.General->MoreCharacter;
+		int freeSlots = ADC->MaxInside + mine->AddInside - mine->NInside;
+		if ( freeSlots <= 0 ) continue;
+
+		for ( int j = 0; j < N && freeSlots > 0; j++ )
+		{
+			OneObject* peasant = Group[units[j]];
+			if ( !peasant || peasant->Sdoxlo ) continue;
+			if ( !peasant->newMons->Peasant ) continue;
+			if ( peasant->LocalOrder ) continue;
+
+			int dx = peasant->RealX - mine->RealX;
+			int dy = peasant->RealY - mine->RealY;
+			int dist = Norma( dx, dy );
+			if ( dist > 204800 ) continue;
+
+			if ( peasant->GoToMine( mine->Index, 16 ) )
+			{
+				freeSlots--;
+				totalSent++;
+			}
+		}
+	}
+
+	if ( totalSent > 0 )
+	{
+		char buf[128];
+		sprintf( buf, "%d peasant(s) sent to fill mines", totalSent );
+		CreateTimedHint( buf, 6000 );
+	}
+}
+
 void CheckArmies( City* );
 
 void EliminateBuilding( OneObject* OB );
@@ -8050,6 +8100,7 @@ void CalculateMotion()
 
 	LongProcesses();
 	AutoDefendBuildings();
+	AutoFillMines();
 
 	byte Mask = NATIONS[NatRefTBL[MyNation]].NMask;
 	bool sce = !( ( SCENINF.hLib == nullptr )/*||SCENINF.StandartVictory*/ );

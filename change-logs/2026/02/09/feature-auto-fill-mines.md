@@ -1,0 +1,1 @@
+Add auto-fill mines feature: every ~40 seconds, idle peasants within range are automatically sent to nearby unfilled mines. Uses GoToMine() which handles capacity checks internally. Displays a hint message when peasants are dispatched.
