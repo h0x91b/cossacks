@@ -8,6 +8,9 @@ set PROJ_OPTS=-p:PlatformToolset=v143 -p:WindowsTargetPlatformVersion=10.0.22621
 
 if not exist "src\Temp" mkdir "src\Temp"
 
+REM Force build_info.cpp recompile so __DATE__/__TIME__ update every build
+del /q "src\Temp\dmcr\build_info.obj" 2>nul
+
 REM Fast path: if import libs already exist, do normal parallel build
 if exist "src\Temp\dmcr.lib" if exist "src\Temp\IChat.lib" goto :incremental
 
