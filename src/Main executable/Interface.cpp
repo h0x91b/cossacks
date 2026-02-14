@@ -6638,6 +6638,8 @@ int processMainMenu()
 	Exit->Hint = GetTextByID("MMEXIT");
 	Exit->AssignSound(GETS("@MOUSESOUND"), MOUSE_SOUND);
 	MMenu.addTextButton(nullptr, 1024 - GetRLCStrWidth(BuildVersion, &SmallYellowFont1), 748, BuildVersion, &SmallYellowFont1, &SmallYellowFont1, &SmallYellowFont1, 0);
+	extern const char g_BuildDateString[];
+	MMenu.addTextButton(nullptr, 10, 748, (char*)g_BuildDateString, &SmallYellowFont1, &SmallYellowFont1, &SmallYellowFont1, 0);
 
 	int nn = 0;
 

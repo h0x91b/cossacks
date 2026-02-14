@@ -1960,6 +1960,143 @@ void GFieldShow()
 	//Adjust timestamps for all hints
 	ProcessHints();
 
+	// === Resource stats table (top-right corner) ===
+	{
+		extern void TakeResLink(OneObject*);
+		char statBuf[64];
+		int lineH = 14;
+		int pad = 12;
+		int tableW = 160;
+		int tx = smapx + (smaplx << 5) - tableW - 10;
+		int ty = smapy + 40;
+		byte cLine = 255;
+
+		int ni = NatRefTBL[MyNation];
+
+		// Peasant counts per resource (by checking current order)
+		int nOnWood = 0, nOnFood = 0, nOnStone = 0;
+		int nIdlePeasants = 0;
+		int nUnfilledMines = 0;
+		int nFreeSlots = 0;
+		int nArmySize = 0;
+		int nTotalPeasants = 0;
+
+		word* Units = NatList[ni];
+		int Nu = NtNUnits[ni];
+		if (Units) for (int i = 0; i < Nu; i++)
+		{
+			OneObject* OB = Group[Units[i]];
+			if (!OB || OB->Sdoxlo)
+				continue;
+			NewMonster* NM = OB->newMons;
+			if (!NM)
+				continue;
+
+			if (NM->Usage == PeasantID)
+			{
+				nTotalPeasants++;
+				Order1* ord = OB->LocalOrder;
+				if (!ord)
+					nIdlePeasants++;
+				else if (ord->DoLink == (ReportFn*)&TakeResLink)
+				{
+					byte rid = ord->info.TakeRes.ResID;
+					if (rid == TreeID)       nOnWood++;
+					else if (rid == FoodID)  nOnFood++;
+					else if (rid == StoneID) nOnStone++;
+				}
+			}
+			else if (!NM->Building)
+				nArmySize++;
+
+			if (NM->Usage == MineID && OB->Ready && OB->Ref.General
+				&& OB->Ref.General->MoreCharacter)
+			{
+				int maxCap = OB->AddInside + OB->Ref.General->MoreCharacter->MaxInside;
+				if (OB->NInside < maxCap)
+				{
+					nUnfilledMines++;
+					nFreeSlots += maxCap - OB->NInside;
+				}
+			}
+		}
+
+		// Mine peasants (already tracked by game)
+		int nGold = NInGold[ni];
+		int nIron = NInIron[ni];
+		int nCoal = NInCoal[ni];
+
+		// --- Calculate table height ---
+		// header(1) + sep + 6 resources + sep + idle + free slots = 10 lines + 8px seps
+		int tableH = pad + lineH * 10 + 8 + pad;
+		Xbar(tx, ty, tableW, tableH, cLine);
+
+		int x0 = tx + pad;
+		int y = ty + pad;
+
+		// Header: Total Peasants + Army
+		sprintf(statBuf, "Peasants: %d  Army: %d", nTotalPeasants, nArmySize);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		Hline(tx + 1, y, tx + tableW - 2, cLine);
+		y += 4;
+
+		// Resource rows
+		sprintf(statBuf, "Wood:  %d", nOnWood);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		sprintf(statBuf, "Food:  %d", nOnFood);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		sprintf(statBuf, "Stone: %d", nOnStone);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		sprintf(statBuf, "Gold:  %d", nGold);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		// Iron: miners
+		sprintf(statBuf, "Iron:  %d", nIron);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		// Coal: miners
+		sprintf(statBuf, "Coal:  %d", nCoal);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		Hline(tx + 1, y, tx + tableW - 2, cLine);
+		y += 4;
+
+		// Idle peasants
+		sprintf(statBuf, "Idle:  %d", nIdlePeasants);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		if (nIdlePeasants > 0)
+			ShowString(x0, y, statBuf, &SmallYellowFont);
+		else
+			ShowString(x0, y, statBuf, &SmallWhiteFont);
+		y += lineH;
+
+		// Free mine slots
+		sprintf(statBuf, "Free slots: %d (%d mines)", nFreeSlots, nUnfilledMines);
+		ShowString(x0 + 1, y + 1, statBuf, &SmallBlackFont);
+		if (nFreeSlots > 0)
+			ShowString(x0, y, statBuf, &SmallYellowFont);
+		else
+			ShowString(x0, y, statBuf, &SmallWhiteFont);
+	}
+
 	ShowDestn();
 
 	time7 = GetRealTime() - time0;

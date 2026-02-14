@@ -286,6 +286,7 @@
     <ClCompile Include="bmptool.cpp" />
     <ClCompile Include="Brigade.cpp" />
     <ClCompile Include="Build.cpp" />
+    <ClCompile Include="build_info.cpp" />
     <ClCompile Include="Cdirsnd.cpp" />
     <ClCompile Include="Chkinet.cpp" />
     <ClCompile Include="ConstStr.cpp" />
@@ -481,6 +482,13 @@
   <ItemGroup>
     <ResourceCompile Include="Script1.rc" />
   </ItemGroup>
+  <ItemDefinitionGroup>
+    <PreBuildEvent>
+      <Command>del /q "$(ProjectDir)$(IntDir)build_info.obj" 2>nul
+exit /b 0</Command>
+      <Message>Force-recompiling build_info.cpp for updated build timestamp</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

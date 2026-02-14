@@ -7949,6 +7949,165 @@ void LongProcesses()
 	CheckCapture_Time = GetTickCount() - T0;
 }
 
+extern int CURTMTMT;
+int TestCapture( OneObject* OBJ );
+
+void AutoDefendBuildings()
+{
+	int totalTime = tmtmt + CURTMTMT;
+	if ( totalTime < 1000 ) return;
+	if ( totalTime % 1000 != 0 ) return;
+
+	for ( byte ni = 0; ni < 8; ni++ )
+	{
+		if ( !NtNUnits[ni] ) continue;
+		if ( NATIONS[ni].AI_Enabled ) continue;
+
+		int N = NtNUnits[ni];
+		word* units = NatList[ni];
+
+		for ( int i = 0; i < N; i++ )
+		{
+			OneObject* mine = Group[units[i]];
+			if ( !mine || mine->Sdoxlo ) continue;
+			if ( !mine->newMons->Building ) continue;
+			if ( !mine->newMons->Capture ) continue;
+			if ( !mine->Ready ) continue;
+			if ( TestCapture( mine ) != 0 ) continue;
+
+			int maxGuards = ( mine->newMons->Usage == FarmID ) ? 1 : 2;
+
+			int existingGuards = 0;
+			for ( int g = 0; g < N; g++ )
+			{
+				OneObject* gu = Group[units[g]];
+				if ( gu && !gu->Sdoxlo && gu->Guard == mine->Index )
+					existingGuards++;
+			}
+			if ( existingGuards >= maxGuards ) continue;
+			maxGuards -= existingGuards;
+
+			OneObject* best[2] = { nullptr, nullptr };
+			int bestDist[2] = { 0x7FFFFFFF, 0x7FFFFFFF };
+
+			for ( int j = 0; j < N; j++ )
+			{
+				OneObject* unit = Group[units[j]];
+				if ( !unit || unit->Sdoxlo ) continue;
+				if ( unit->newMons->Building ) continue;
+				if ( unit->newMons->Peasant ) continue;
+				if ( unit->newMons->Officer ) continue;
+				if ( unit->newMons->Baraban ) continue;
+				if ( unit->newMons->LockType != 0 ) continue;
+				if ( unit->Guard != 0xFFFF ) continue;
+				if ( unit->BrigadeID != 0xFFFF ) continue;
+				if ( unit->InArmy ) continue;
+				if ( unit->EnemyID != 0xFFFF ) continue;
+
+				int dx = unit->RealX - mine->RealX;
+				int dy = unit->RealY - mine->RealY;
+				int dist = Norma( dx, dy );
+				if ( dist > 204800 ) continue;
+
+				int adjDist = dist;
+				if ( !unit->newMons->Artilery &&
+					unit->newMons->Usage != FastHorseID &&
+					unit->newMons->Usage != HardHorceID &&
+					unit->newMons->Usage != HorseStrelokID )
+				{
+					adjDist = dist / 2;
+				}
+
+				if ( adjDist < bestDist[0] )
+				{
+					best[1] = best[0]; bestDist[1] = bestDist[0];
+					best[0] = unit; bestDist[0] = adjDist;
+				}
+				else if ( adjDist < bestDist[1] )
+				{
+					best[1] = unit; bestDist[1] = adjDist;
+				}
+			}
+
+			int sent = 0;
+			for ( int k = 0; k < maxGuards; k++ )
+			{
+				if ( best[k] )
+				{
+					best[k]->Guard = mine->Index;
+					best[k]->NewMonsterSendTo(
+						mine->RealX >> 4, mine->RealY >> 4, 16, 0 );
+					sent++;
+				}
+			}
+
+			if ( sent > 0 && ni == NatRefTBL[MyNation] )
+			{
+				char buf[128];
+				sprintf( buf, "%d unit(s) sent to defend building", sent );
+				CreateTimedHint( buf, 6000 );
+			}
+		}
+	}
+}
+
+void AutoFillMines()
+{
+	int totalTime = tmtmt + CURTMTMT;
+	if ( totalTime < 1000 ) return;
+	if ( totalTime % 1000 != 0 ) return;
+
+	int localSent = 0;
+
+	for ( byte ni = 0; ni < 8; ni++ )
+	{
+		if ( !NtNUnits[ni] ) continue;
+		if ( NATIONS[ni].AI_Enabled ) continue;
+
+		int N = NtNUnits[ni];
+		word* units = NatList[ni];
+
+		for ( int i = 0; i < N; i++ )
+		{
+			OneObject* mine = Group[units[i]];
+			if ( !mine || mine->Sdoxlo ) continue;
+			if ( mine->newMons->Usage != MineID ) continue;
+			if ( !mine->Ready ) continue;
+
+			AdvCharacter* ADC = mine->Ref.General->MoreCharacter;
+			int freeSlots = ADC->MaxInside + mine->AddInside - mine->NInside;
+			if ( freeSlots <= 0 ) continue;
+
+			for ( int j = 0; j < N && freeSlots > 0; j++ )
+			{
+				OneObject* peasant = Group[units[j]];
+				if ( !peasant || peasant->Sdoxlo ) continue;
+				if ( !peasant->newMons->Peasant ) continue;
+				if ( peasant->LocalOrder ) continue;
+
+				int dx = peasant->RealX - mine->RealX;
+				int dy = peasant->RealY - mine->RealY;
+				int dist = Norma( dx, dy );
+				if ( dist > 204800 ) continue;
+
+				if ( peasant->GoToMine( mine->Index, 16 ) )
+				{
+					freeSlots--;
+					if ( ni == NatRefTBL[MyNation] )
+						localSent++;
+				}
+			}
+		}
+	}
+
+	if ( localSent > 0 )
+	{
+		char buf[128];
+		sprintf( buf, "%d peasant(s) sent to fill mines", localSent );
+		CreateTimedHint( buf, 6000 );
+	}
+}
+
 void CheckArmies( City* );
 
 void EliminateBuilding( OneObject* OB );
@@ -7958,6 +8117,9 @@ void CalculateMotion()
 	byte MyNT = NatRefTBL[MyNation];
 
 	LongProcesses();
+
+	AutoDefendBuildings();
+	AutoFillMines();
 
 	byte Mask = NATIONS[NatRefTBL[MyNation]].NMask;
 	bool sce = !( ( SCENINF.hLib == nullptr )/*||SCENINF.StandartVictory*/ );
