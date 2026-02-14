@@ -1,0 +1,1 @@
+Fix auto-defend sending too many guards to distant buildings. Now counts existing guards (units with Guard == building index) before dispatching, and only sends the missing amount up to the limit (2 for buildings, 1 for houses).

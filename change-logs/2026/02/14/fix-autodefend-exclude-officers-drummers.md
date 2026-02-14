@@ -1,0 +1,1 @@
+Exclude officers and drummers (17th/18th century) from auto-defend guard selection. These units are formation support and should not be assigned as building guards.

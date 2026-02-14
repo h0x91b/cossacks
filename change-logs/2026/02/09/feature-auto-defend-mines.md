@@ -1,0 +1,1 @@
+Added AutoDefendMines() feature: every 1 game-minute, checks for undefended mines (TestCapture==0) and sends up to 2 nearest free combat units to guard them. Infantry is preferred over cavalry/artillery. Units are assigned Guard mode on the mine and a timed hint notifies the player.

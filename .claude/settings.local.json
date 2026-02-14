@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\*)",
+      "Bash(findstr:*)",
+      "Bash(git -C \"D:\\\\src\\\\cossacks-revamp-2017\" status)",
+      "Bash(git -C \"D:\\\\src\\\\cossacks-revamp-2017\" log *)",
+      "Bash(python:*)",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\"*)",
+      "Bash(cmd /c \"\"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\VC\\\\Auxiliary\\\\Build\\\\vcvarsall.bat\"\" *\")",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"D:\\\\src\\\\cossacks-revamp-2017\\\\src\\\\Cossacks.sln\" -p:PlatformToolset=v143 -p:WindowsTargetPlatformVersion=10.0.22621.0 -p:Configuration=Release -p:Platform=x86 -m)",
+      "Bash(git add:*)",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"D:\\\\src\\\\cossacks-revamp-2017\\\\src\\\\Cossacks.sln\" -p:PlatformToolset=v143 -p:WindowsTargetPlatformVersion=10.0.22621.0 -p:Configuration=Release -p:Platform=x86 -m -v:minimal)",
+      "Bash(git commit:*)",
+      "Bash(for:*)",
+      "Bash(do grep -l \"^void LoadNation\\\\|^void LoadNations\\\\|= bagac\" \"$file\")",
+      "Bash(done)",
+      "Bash(grep:*)",
+      "Bash(PYTHONIOENCODING=utf-8 python:*)",
+      "Bash(pip install:*)"
+    ]
+  }
+}

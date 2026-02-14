@@ -2,3 +2,15 @@
 src/Temp/
 src/.vs/
 src/Testing/
+Cossacks Back to War v1.52 (2025)/
+tools/tmp/
+tools/Scenario Tool/
+tools/GSCFileUtility/
+tools/GSC TOOLS PACK/
+tools/cs_sedit/
+tools/cs_sedit 393/
+*.exe
+*.obj
+*.lib
+*.zip
+tools/manual.pdf

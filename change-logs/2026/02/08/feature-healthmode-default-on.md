@@ -1,0 +1,1 @@
+Changed HealthMode (unit health/reload bars toggled by tilde key) to default to enabled when a game starts, instead of disabled.

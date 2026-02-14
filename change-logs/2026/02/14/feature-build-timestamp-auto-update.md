@@ -1,0 +1,1 @@
+Moved build date/time string from inline literal in Interface.cpp to a separate build_info.cpp file with a PreBuildEvent that deletes its .obj before each build. This ensures __DATE__ and __TIME__ macros always reflect the actual build time, even during incremental builds.
