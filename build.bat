@@ -16,18 +16,13 @@ if exist "src\Temp\dmcr.lib" if exist "src\Temp\IChat.lib" goto :incremental
 
 echo === Bootstrap build (import libs missing) ===
 
-REM Set up MSVC tools (cl.exe, lib.exe) for creating stub library
-call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86 >nul 2>&1
-
 echo [1/6] Building CommCore.lib...
 %MSBUILD% "src\CommCore library\CommCore library.vcxproj" %PROJ_OPTS%
 if errorlevel 1 goto :fail
 
-echo [2/6] Creating stub IChat.lib...
-echo void __stub(void){} > "%TEMP%\__stub.c"
-cl /nologo /c "%TEMP%\__stub.c" /Fo"%TEMP%\__stub.obj"
-lib /nologo /out:"src\Temp\IChat.lib" /machine:x86 "%TEMP%\__stub.obj"
-del "%TEMP%\__stub.c" "%TEMP%\__stub.obj" 2>nul
+echo [2/6] Installing bootstrap IChat.lib...
+copy /Y "src\bootstrap\IChat.lib" "src\Temp\IChat.lib"
+if errorlevel 1 goto :fail
 
 echo [3/6] Building dmcr.exe (bootstrap pass)...
 %MSBUILD% "src\Main executable\Cossacks.vcxproj" %PROJ_OPTS% /p:ForceFileOutput=UndefinedSymbolOnly
