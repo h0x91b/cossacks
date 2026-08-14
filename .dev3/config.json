@@ -1,0 +1,5 @@
+{
+  "devScript": "python .dev3/dev-run.py",
+  "defaultBaseBranch": "main",
+  "defaultCompareRefMode": "remote"
+}
