@@ -20,7 +20,72 @@
       "Bash(done)",
       "Bash(grep:*)",
       "Bash(PYTHONIOENCODING=utf-8 python:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(dev3:*)"
+    ],
+    "defaultMode": "auto"
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"C:/Users/user/AppData/Local/dev3.electrobun.dev/canary/app/Resources/app/cli/dev3.exe\" task move --status in-progress --if-status-not review-by-ai --tolerate-app-offline"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"C:/Users/user/AppData/Local/dev3.electrobun.dev/canary/app/Resources/app/cli/dev3.exe\" task move --status in-progress --if-status-not review-by-ai --tolerate-app-offline"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"C:/Users/user/AppData/Local/dev3.electrobun.dev/canary/app/Resources/app/cli/dev3.exe\" task move --status in-progress --if-status-not review-by-ai --tolerate-app-offline"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"C:/Users/user/AppData/Local/dev3.electrobun.dev/canary/app/Resources/app/cli/dev3.exe\" task move --status user-questions --tolerate-app-offline"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"C:/Users/user/AppData/Local/dev3.electrobun.dev/canary/app/Resources/app/cli/dev3.exe\" task move --status review-by-user --if-status in-progress --tolerate-app-offline"
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"C:/Users/user/AppData/Local/dev3.electrobun.dev/canary/app/Resources/app/cli/dev3.exe\" hook claude-stop-failure",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }

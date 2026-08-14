@@ -1,0 +1,1 @@
+Commit the dev-3.0 task-status hooks that `dev3 install-hooks` wrote into `.claude/settings.local.json`, plus the `Bash(dev3:*)` permission and `defaultMode: auto`. The hook commands reference the dev3 CLI by absolute path, so they only fire on a machine with dev-3.0 installed at that location.
