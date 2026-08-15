@@ -14,3 +14,7 @@ tools/cs_sedit 393/
 *.lib
 *.zip
 tools/manual.pdf
+
+# Pre-built import lib needed to break the dmcr.exe <-> IChat.dll link cycle
+# on a clean checkout. build.bat copies it into src/Temp/ before the first pass.
+!src/bootstrap/IChat.lib
